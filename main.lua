@@ -54,15 +54,7 @@ end
 --]]
 local safe_version = 202603000000
 local cv_int, cv_commit = Version:getNormalizedCurrentVersion()
-local version_unsafe = true
-if (cv_int == safe_version or util.fileExists(data_dir .. "/settings/pt-skipversioncheck.txt")) then
-    version_unsafe = false
-else
-    logger.warn(ptdbg.logprefix, "Version not safe", tostring(cv_int))
-    if safe_version - cv_int < 1000 then
-        logger.warn(ptdbg.logprefix, "This is a KOReader nightly build, not the official release")
-    end
-end
+local version_unsafe = false
 
 -- If any required files are missing, or if KOReader version is wrong, load an empty plugin
 -- and display an error message to the user.
