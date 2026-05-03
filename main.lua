@@ -303,6 +303,74 @@ function CoverBrowser:init()
     BookInfoManager:closeDbConnection() -- will be re-opened if needed
 end
 
+function CoverBrowser:stopPlugin()
+    logger.info(ptdbg.logprefix, "Disabling plugin per user request")
+end
+
+function CoverBrowser:deletePluginSettings()
+    logger.info(ptdbg.logprefix, "Removing settings and cache database per user request")
+
+    -- tear down PT and restore stock filemanager view
+    local DataStorage = require("datastorage")
+    local settings_dir = DataStorage:getSettingsDir()
+    local fc = self.ui.file_chooser
+    CoverBrowser.removeFileDialogButtons("filesearcher")
+    _modified_widgets["filesearcher"].updateItemTable = _updateItemTable_orig_funcs["filesearcher"]
+    FileChooser.updateItems = _FileChooser_updateItems_orig
+    FileChooser.onCloseWidget = _FileChooser_onCloseWidget_orig
+    FileChooser._recalculateDimen = _FileChooser__recalculateDimen_orig
+    CoverBrowser.removeFileDialogButtons("filemanager")
+    FileChooser.genItemTable = _FileChooser_genItemTable_orig
+    FileManager.setupLayout = _FileManager_setupLayout_orig
+    Menu.init = _Menu_init_orig
+    Menu.updatePageInfo = _Menu_updatePageInfo_orig
+    FileChooser._updateItemsBuildUI = nil
+    FileChooser._do_cover_images = nil
+    FileChooser._do_filename_only = nil
+    FileChooser._do_hint_opened = nil
+    FileChooser._do_center_partial_rows = nil
+    if fc then
+        fc:_recalculateDimen()
+        fc:switchItemTable(nil, nil, fc.prev_itemnumber, { dummy = "" }) -- dummy itemmatch to draw focus
+    end
+    BookInfoManager:closeDbConnection()
+
+    -- delete settings
+    G_reader_settings:delSetting("aaaProjectTitle_initial_default_setup_done2")
+    os.remove(settings_dir .. "/pt-skipversioncheck.txt")
+
+    -- delete cache database
+    os.remove(settings_dir .. "/PT_bookinfo_cache.sqlite3")
+
+    -- delete installed fonts
+    FFIUtil.purgeDir(ptutil.koreader_dir .. "/fonts/source")
+
+    -- delete installed icons
+    local icons_path = ptutil.koreader_dir .. "/icons"
+    local icons_list = {
+        "favorites",
+        "go_up",
+        "hero",
+        "history",
+        "last_document",
+        "plus",
+    }
+    local icons_checksum_list = {
+        "546928404910d90cbdcaf4b1c207683c",
+        "5536bb523b1f11a6ef48ec71bb7ddc55",
+        "a92f359e7521a1bed709f90e464c6b5d",
+        "e26a48a6e9f6dc4086bcd32222349752",
+        "9408835d5c1aa69d8ad9c2701e22e33a",
+        "515a084140c4931607bc066b6819d34e",
+    }
+    for i, icon in ipairs(icons_list) do
+        local icon_file = icons_path .. "/" .. icon .. ".svg"
+        if icons_checksum_list[i] == util.partialMD5(icon_file) then
+            os.remove(icon_file)
+        end
+    end
+end
+
 function CoverBrowser:addToMainMenu(menu_items)
     local sub_item_table, history_sub_item_table, collection_sub_item_table = {}, {}, {}
     local fc = self.ui.file_chooser
