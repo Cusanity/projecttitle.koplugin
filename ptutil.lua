@@ -596,10 +596,6 @@ end
 
 function ptutil.formatSeries(series, series_index)
     local formatted_series = ""
-    -- suppress series if index is "0"
-    if series_index == 0 then
-        return ""
-    end
     if series_index then
         formatted_series = "#" .. series_index .. ptutil.separator.en_dash .. BD.auto(series)
     else
