@@ -600,10 +600,6 @@ function ptutil.formatSeries(series, series_index)
     if series_index == 0 then
         return ""
     end
-    -- if series is formated like "big series: small subseries" then show only "small subseries"
-    if string.match(series, ": ") then
-        series = string.sub(series, util.lastIndexOf(series, ": ") + 1, -1)
-    end
     if series_index then
         formatted_series = "#" .. series_index .. ptutil.separator.en_dash .. BD.auto(series)
     else
