@@ -604,6 +604,15 @@ function ptutil.formatSeries(series, series_index)
     return formatted_series
 end
 
+function ptutil.formatSeriesIndex(series_index)
+    local formatted_series_index = ""
+    formatted_series_index = " " .. series_index .. " "
+    if string.len(formatted_series_index) == 3 then
+        formatted_series_index = " " .. formatted_series_index .. " "
+    end
+    return formatted_series_index
+end
+
 function ptutil.formatAuthorSeries(authors, series, series_mode, show_tags)
     local formatted_author_series = ""
     if authors == nil or authors == "" then
